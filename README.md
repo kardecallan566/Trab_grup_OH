@@ -1,2 +1,5 @@
-# Trab_MANS
-Trabalho de Metodos de aprendizagem não supervisionado
+# Trabalho em Grupo de Otimização Heuristica
+
+
+Objetivo deste Trabalho é abordar os conceito aprendidos em Aula para analisar é confirmar o conhecimento dos Alunos.
+
