@@ -11,6 +11,9 @@ ipython = "^8.14.0"
 ipykernel = "^6.23.1"
 plotnine = "^0.12.1"
 pandas = "^2.0.2"
+fslash = "^0.17.0"
+pampy = "^0.3.0"
+ordered-set = "^4.1.0"
 
 
 [build-system]
