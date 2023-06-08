@@ -728,18 +728,6 @@ files = [
 ]
 
 [[package]]
-name = "pampy"
-version = "0.3.0"
-description = "The Pattern Matching for Python you always dreamed of"
-category = "main"
-optional = false
-python-versions = ">3.6"
-files = [
-    {file = "pampy-0.3.0-py3-none-any.whl", hash = "sha256:304470a6562173096fc88c22dc0ab50401ca2e3875a8725ee510759ec8ba58ff"},
-    {file = "pampy-0.3.0.tar.gz", hash = "sha256:82054212e4478fc22163c55321a3583eda9918aff4440eed6c197e872a2a667b"},
-]
-
-[[package]]
 name = "pandas"
 version = "2.0.2"
 description = "Powerful data structures for data analysis, time series, and statistics"
@@ -1425,4 +1413,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "e922e164f6a08b913a6009a55836b94ab0d9bfa36158520ed35c2adbf0a07d44"
+content-hash = "0c74b7f5bbd02de15fe988740d7543d651af28e9d0f6c476d28c4f6f65c7b1dc"
