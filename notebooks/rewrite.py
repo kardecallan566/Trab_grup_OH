@@ -155,13 +155,34 @@ def plot_tarefas():
     labs(x="tarefa", y="tempo") + \
     theme_classic()
 
+def get_maquina(index: int) -> Maquina:
+  return maquinas[index-1]
 
+def tarefas_as_list() -> list[int]:
+  return list(Tarefas.keys())
 # endregion
 
 # region funcoes algoritmo
 def heuristica() -> cromossoma:
-  #TODO
-  pass
+  ret = [0] * len(Tarefas)
+  tarefas = tarefas_as_list()
+  M1 = get_maquina(1)
+  M2 = get_maquina(2)
+  M3 = get_maquina(3)
+  M1_ind = 0
+  M2_ind = M1_ind + M1.n_tarefas
+  M3_ind = M2_ind + M2.n_tarefas
+  # 1 - atribuir as 3 tarefas criticas às 3 máquinas, M1 recebendo a mais pequena sendo que tem 4
+  criticas = list(restricao.keys())
+  criticas.sort(key=lambda t: get_time_of_tarefa(t), reverse=False)
+  ret[M1_ind], ret[M2_ind], ret[M3_ind] = criticas
+  # 2 - como a M1 tem 4 tarefas, atribuir as 3 tarefas mais pequenas à M1
+  tarefas.sort(key=lambda t: get_time_of_tarefa(t), reverse=False)
+  ret[M1_ind+1:M1_ind+4] = tarefas[:3]
+  # 3 - dividir as restantes tarefas pelas máquinas de forma equilibrada
+  # ou seja, M2 vai ter as tarefas mais pequena e maior (das restantes) e M3 vai ter as tarefas do meio
+  ret[M2_ind+1], ret[M3_ind+1], ret[M3_ind+2], ret[M2_ind+2] = tarefas[3:]
+  return ret
 
 # endregion
 
