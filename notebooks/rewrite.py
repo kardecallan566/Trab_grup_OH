@@ -29,7 +29,7 @@ seed = random.seed
 horas = int
 tarefa = int
 periodo = (horas, horas)
-
+cromossoma = list[tarefa]
 
 @dc
 class Maquina:
@@ -58,15 +58,16 @@ restricao: dict[tarefa, horas] = {  # tempo minimo para a compleção das tarefa
 }
 maquinas = [Maquina(1, 4), Maquina(2, 3), Maquina(3, 3)]
 
-
 # endregion
 
 # region functions object like
 def get_time_of_tarefa(t: tarefa) -> horas:
   return Tarefas[t]
 
+def get_tarefa_from_cromo(cromo: cromossoma, t: tarefa) -> tarefa:
+  return cromo[t - 1]
 
-def cromo_to_maqs(cromo: list[tarefa]) -> dict[Maquina, list[tarefa]]:
+def cromo_to_maqs(cromo: cromossoma) -> dict[Maquina, list[tarefa]]:
   # convert chromosome to machine dictionary
   ret = {m: [] for m in maquinas}
   cut = 0
@@ -86,7 +87,7 @@ def maqs_to_horario(maqs: dict[Maquina, list[tarefa]]) -> dict[Maquina, list[per
   return ret
 
 
-def plot_cromo(cromo: list[tarefa]):
+def plot_cromo(cromo: cromossoma):
   maqs = cromo_to_maqs(cromo)
   horario = maqs_to_horario(maqs)
   max_tempo = max([i[1] for m in horario for i in horario[m]])
@@ -113,7 +114,7 @@ def plot_cromo(cromo: list[tarefa]):
     theme(aspect_ratio=0.7)
 
 
-def cromo_respeita_restricao(cromo: list[tarefa]) -> bool:
+def cromo_respeita_restricao(cromo: cromossoma) -> bool:
   # se o horario das tarefas com restricoes acaba antes do valor da restricao
   return all(
     maqs_to_horario(cromo_to_maqs(cromo))[m][-1][1] <= restricao[m.numero]
@@ -121,7 +122,7 @@ def cromo_respeita_restricao(cromo: list[tarefa]) -> bool:
   )
 
 
-def cromo_to_df(cromo: list[tarefa]) -> pd.DataFrame:
+def cromos_to_df(*cromos: list[cromossoma]) -> pd.DataFrame:
   # hardcoded, supposed to be:
   # M1: tarefas do M1,
   # M2: tarefas do M2,
@@ -130,12 +131,12 @@ def cromo_to_df(cromo: list[tarefa]) -> pd.DataFrame:
   # respeita restricao?: se o horario das tarefas com restricoes acaba antes do valor da restricao
   # respeita unique?: se o cromo nao tem tarefas repetidas
   return pd.DataFrame({
-    "M1": cromo[:4],
-    "M2": cromo[4:7],
-    "M3": cromo[7:],
-    "tempo total": max(maqs_to_horario(cromo_to_maqs(cromo))[m][-1][1] for m in maquinas),
-    "respeita restricao?": cromo_respeita_restricao(cromo),
-    "respeita unique?": len(cromo) == len(set(cromo)),
+    "M1": [c[:4] for c in cromos],
+    "M2": [c[4:7] for c in cromos],
+    "M3": [c[7:] for c in cromos],
+    "tempo total": [max(maqs_to_horario(cromo_to_maqs(c))[m][-1][1] for m in maquinas) for c in cromos],
+    "respeita restricao?": [cromo_respeita_restricao(c) for c in cromos],
+    "respeita unique?": [len(c) == len(set(c)) for c in cromos],
   })
 
 
@@ -153,4 +154,17 @@ def plot_tarefas():
     scale_fill_discrete(name="Com restrição?") + \
     labs(x="tarefa", y="tempo") + \
     theme_classic()
+
+
 # endregion
+
+# region funcoes algoritmo
+def heuristica() -> cromossoma:
+  #TODO
+  pass
+
+# endregion
+
+alineas = {
+  "a)": plot_tarefas,
+}
