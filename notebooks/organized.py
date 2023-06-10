@@ -1,3 +1,5 @@
+# TODO ver commit anterior e mudar aqui
+
 # imports
 import itertools
 import pandas as pd
