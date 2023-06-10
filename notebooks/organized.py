@@ -5,6 +5,7 @@ import random
 import plotnine.options
 from plotnine import *
 from pprint import pprint as pp
+
 plotnine.options.figure_size = (7, 5)
 
 
@@ -88,6 +89,7 @@ def maqs_to_horario(maqs: dict[Maquina, list[tarefa]]) -> dict[Maquina, list[per
       ret[maq].append((ret[maq][-1][1], ret[maq][-1][1] + get_time_of_tarefa(t)))
   return ret
 
+
 def cromo_to_horario(crom: cromossoma) -> dict[tarefa, periodo]:
   maqs: dict[Maquina, list[tarefa]] = cromo_to_maqs(crom)
   horario: dict[Maquina, list[periodo]] = maqs_to_horario(maqs)
@@ -97,6 +99,7 @@ def cromo_to_horario(crom: cromossoma) -> dict[tarefa, periodo]:
     for t, p in tarefa_periodo:
       ret[t] = p
   return ret
+
 
 def plot_cromo(cromo: cromossoma):
   maqs = cromo_to_maqs(cromo)
@@ -131,6 +134,7 @@ def cromo_respeita_restricao(cromo: cromossoma) -> bool:
     if t in restricao and p[1] > restricao[t]:
       return False
   return True
+
 
 def get_tempo_total(cromo: cromossoma) -> horas:
   # tempo máximo de todas as máquinas
@@ -279,26 +283,27 @@ def cromos_to_df_updated(*cromos: cromossoma) -> pd.DataFrame:
 
 
 class CriteriosDeParagem:
-  def __init__(self, iter_max=None, no_improv_max=None, aptid_min=None):
+  def __init__(self, iter_max=None, no_improv_max=None, aptidao_menos_que=None):
     self.iter_max: int = iter_max
     self.no_improv_max: int = no_improv_max
-    self.aptid_min: int = aptid_min
+    self.aptidao_menos_que: int = aptidao_menos_que
 
     self.curr_iter = 0
     self.no_improv_iter = 0
-    self.aptid_max = 0
+    self.current_aptid = 0
 
   def shouldStop(self) -> bool:
     return (
         (self.iter_max is not None and self.curr_iter >= self.iter_max) or
         (self.no_improv_max is not None and self.no_improv_iter >= self.no_improv_max) or
-        (self.aptid_min is not None and self.aptid_max >= self.aptid_min)
+        (self.aptidao_menos_que is not None and self.current_aptid >= self.aptidao_menos_que)
     )
 
   def update(self, max_aptid_found: int):
     self.curr_iter += 1
-    self.no_improv_iter += 1 if max_aptid_found > self.aptid_max else 0
-    self.aptid_max = max(self.aptid_max, max_aptid_found)
+    self.no_improv_iter += 1 if max_aptid_found > self.current_aptid else 0
+    self.current_aptid = max(self.current_aptid, max_aptid_found)
+
 
 # selecao proporcional à aptidao
 def selecao(populacao: populacaoT) -> tuple[cromossoma, cromossoma]:
@@ -315,7 +320,7 @@ def selecao(populacao: populacaoT) -> tuple[cromossoma, cromossoma]:
   return populacao[ind1], populacao[ind2]
 
 
-def populacaoInicial(tamanho: int, tamanho_cromo=10, log=False, seed = None) -> populacaoT:
+def populacaoInicial(tamanho: int, tamanho_cromo=10, log=False, seed=None) -> populacaoT:
   if seed is not None: set_seed(seed)
   populacao = []
   for i in range(tamanho):
@@ -330,10 +335,10 @@ def algoritmo_genetico(
     criterios_de_paragem: CriteriosDeParagem = CriteriosDeParagem(),
     elitismo_tamanho: int = 1,
     log=False
-) -> tuple[cromossoma, list[list[cromossoma]]]:
+) -> tuple[cromossoma, list[populacaoT]]:
   ret = []
   # 1. Gerar a população inicial
-  populacao = sorted(populacaoInicial(tamanho_populacao, log=log), key = lambda c: aptidao(c))
+  populacao = sorted(populacaoInicial(tamanho_populacao, log=log), key=lambda c: aptidao(c))
   elites: list[cromossoma] = [populacao[i] for i in range(elitismo_tamanho)]
   # 2. popular uma nova população
   while not criterios_de_paragem.shouldStop():
@@ -350,7 +355,7 @@ def algoritmo_genetico(
       new_populacao.append(filho)
     # 3. elitismo
     # 3.1 obter o(s) menos abto(s)
-    new_populacao = sorted(new_populacao, key= lambda c: aptidao(c), reverse=False)
+    new_populacao = sorted(new_populacao, key=lambda c: aptidao(c), reverse=False)
     # 3.2 substituir o(s) menos apto(s) pelo(s) mais apto(s) da população anterior
     for i in range(elitismo_tamanho):
       new_populacao[i] = elites[i]
@@ -362,6 +367,7 @@ def algoritmo_genetico(
     # 5. critérios de paragem
     criterios_de_paragem.update(aptidao(elites[0]))
   return elites[0], ret
+
 
 # endregion
 
