@@ -213,7 +213,7 @@ def crossover(pai: list[int], mae: list[int], log=False, seed=None) -> list[int]
   nao_escolhidos = set(pai)
 
   # 1º escolher um ponto de partida aleatorio
-  ponto_partida = current = random.choice([pai[0], mae[0]])
+  ponto_partida = escolhido = random.choice([pai[0], mae[0]])
   # 2º fazer as matrizes de adjacencia (incluindo os ultimos)
   pai_adj = {pai[i]: {pai[i - 1], pai[(i + 1) % len(pai)]} for i in range(len(pai))}
   mae_adj = {mae[i]: {mae[i - 1], mae[(i + 1) % len(mae)]} for i in range(len(mae))}
@@ -226,18 +226,18 @@ def crossover(pai: list[int], mae: list[int], log=False, seed=None) -> list[int]
   while len(nao_escolhidos) > 1:
     if log: print("Não escolhidos:", nao_escolhidos)
     if log: print("Filho:", filho)
-    if log: print("Current:", current)
-    # adicionar o current ao filho
-    filho.append(current)
-    nao_escolhidos.remove(current)
+    if log: print("Escolhido:", escolhido)
+    # adicionar o escolhido ao filho
+    filho.append(escolhido)
+    nao_escolhidos.remove(escolhido)
 
     # conseguir as escolhas possiveis
-    escolhas = adj[current] & nao_escolhidos
+    escolhas = adj[escolhido] & nao_escolhidos
     if len(escolhas) == 0:
       # se nao houver escolhas, escolher um aleatorio entre os nao escolhidos
-      current = random.choice(list(nao_escolhidos))
+      escolhido = random.choice(list(nao_escolhidos))
     else:
-      current = random.choice(list(escolhas))
+      escolhido = random.choice(list(escolhas))
   # adicionar o filho que falta
   filho.append(nao_escolhidos.pop())
   return filho
