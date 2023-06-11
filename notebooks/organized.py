@@ -184,6 +184,16 @@ def get_maquina(index: int) -> Maquina:
 def tarefas_as_list() -> list[int]:
   return list(Tarefas.keys())
 
+def maqs_to_cromo(maqs: dict[Maquina, list[tarefa]]) -> cromossoma:
+  return [t for m in maqs for t in maqs[m]]
+
+def from_ina_to_adm(cromo: cromossoma) -> cromossoma:
+  # puxar pra esquerda todas as tarefas de prioridade, n ve por unicos
+  maqs: dict[Maquina, list[tarefa]] = cromo_to_maqs(cromo)
+  tarefas_com_restricao = list(restricao.keys())
+  for maq in maqs:
+    maqs[maq] = sorted(maqs[maq], key=lambda t: t in tarefas_com_restricao, reverse=True)
+  return maqs_to_cromo(maqs)
 
 # endregion
 
@@ -383,4 +393,3 @@ alineas = {
   "f)": aptidao,
   "g)": algoritmo_genetico,
 }
-
