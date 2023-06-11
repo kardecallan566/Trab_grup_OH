@@ -383,3 +383,4 @@ alineas = {
   "f)": aptidao,
   "g)": algoritmo_genetico,
 }
+
