@@ -246,8 +246,7 @@ def heuristica() -> cromossoma:
 
 # ERO
 def crossover(pai: list[int], mae: list[int], log_level=0, seed=None) -> list[int]:
-  if seed is not None:
-    set_seed(seed)
+  if seed is not None: set_seed(seed)
   # selecionar aleatoriamente uma ligacao entre 2 genes, entre os pais, e adicionar a um novo filho
   filho = []
   nao_escolhidos = set(pai)
@@ -255,10 +254,8 @@ def crossover(pai: list[int], mae: list[int], log_level=0, seed=None) -> list[in
   # 1º escolher um ponto de partida aleatorio
   ponto_partida = escolhido = random.choice([pai[0], mae[0]])
   # 2º fazer as matrizes de adjacencia (incluindo os ultimos)
-  pai_adj = {pai[i]: {pai[i - 1], pai[(i + 1) % len(pai)]}
-             for i in range(len(pai))}
-  mae_adj = {mae[i]: {mae[i - 1], mae[(i + 1) % len(mae)]}
-             for i in range(len(mae))}
+  pai_adj = {pai[i]: {pai[i - 1], pai[(i + 1) % len(pai)]} for i in range(len(pai))}
+  mae_adj = {mae[i]: {mae[i - 1], mae[(i + 1) % len(mae)]} for i in range(len(mae))}
   # 3º fazer uniao das matrizes de adjacencia
   adj = {i: pai_adj[i] | mae_adj[i] for i in pai_adj}
   log("Adjacencias:", log_level)
@@ -303,8 +300,12 @@ def mutacao(crom: cromossoma, prob=.1, seed=None):
 
 
 def aptidao(crom: cromossoma) -> float:
+  return aptidao_from_tempo_total(get_tempo_total(crom))
+
+def aptidao_from_tempo_total(tempo_total: int) -> float:
+  
   # A aptidao equivale ao inverso do tempo total de execução do cromossomo
-  return 1/get_tempo_total(crom)
+  return 1/tempo_total
 
 def cromos_to_df_updated(*cromos: cromossoma) -> pd.DataFrame:
   # same as the one above but sem respeita unique (q é garantido) e com apitdao
@@ -319,28 +320,27 @@ def cromos_to_df_updated(*cromos: cromossoma) -> pd.DataFrame:
 
 
 class CriteriosDeParagem:
-  def __init__(self, iter_max=None, iter_max_sem_melhoria=None, aptidao_menos_que=None, ):
+  def __init__(self, iter_max=None, iter_max_sem_melhoria=None, tempo_menos_que=None, ):
     self.iter_max: int = iter_max
     self.no_improv_max: int = iter_max_sem_melhoria
-    self.aptidao_menos_que: int = aptidao_menos_que
+    self.aptidao_minimo: float = aptidao_from_tempo_total(tempo_menos_que) if tempo_menos_que is not None else None
+
 
     self.curr_iter = 0
     self.no_improv_iter = 0
     self.current_aptid = 0
     self.has_elite = False
 
-  def shouldStop(self, failsafe=1000) -> bool:
+  def shouldStop(self, failsafe = 1000) -> bool:
     # fail safe
-    if not self.has_elite:
-      return False
+    if not self.has_elite: return False
     if self.iter_max is not None and self.curr_iter > failsafe:
       print("WARNING: CriteriosDeParagem.shouldStop() called too many times")
       return True
     return (
-        (self.iter_max is not None and self.curr_iter >= self.iter_max) or
-        (self.no_improv_max is not None and self.no_improv_iter >= self.no_improv_max) or
-        (self.aptidao_menos_que is not None and self.current_aptid <=
-         self.aptidao_menos_que)
+      (self.iter_max is not None          and self.curr_iter >= self.iter_max) or
+      (self.no_improv_max is not None     and self.no_improv_iter >= self.no_improv_max) or
+      (self.aptidao_minimo is not None    and self.current_aptid > self.aptidao_minimo)
     )
 
   def update(self, latest_elite: float):
@@ -361,20 +361,17 @@ def selecao(populacao: populacaoT) -> tuple[cromossoma, cromossoma]:
   return random.choices(populacao, weights=aptidoes, k=2)
 
 
-def populacaoInicial(tamanho: int, tamanho_cromo=10, log_level=0, seed=None) -> populacaoT:
-  if seed is not None:
-    set_seed(seed)
+def populacaoInicial(tamanho: int, tamanho_cromo=10, log_level=0, seed = None) -> populacaoT:
+  if seed is not None: set_seed(seed)
   populacao = []
   for i in range(tamanho):
     cromo = random.sample(range(1, tamanho_cromo + 1), tamanho_cromo)
-    log(f"Cromossoma {i + 1}: {cromo}",
-        log_level+1 if log_level > 0 else 0)
-    log(f"Tempos: {[get_time_of_tarefa(i) for i in cromo]}",
-        log_level+1 if log_level > 0 else 0)
-    log(f"Tempo total: {get_tempo_total(cromo)}",
-        log_level+1 if log_level > 0 else 0)
+    log(f"Cromossoma {i + 1}: {cromo}", log_level+1 if log_level > 0 else 0)
+    log(f"Tempos: {[get_time_of_tarefa(i) for i in cromo]}", log_level+1 if log_level > 0 else 0)
+    log(f"Tempo total: {get_tempo_total(cromo)}", log_level+1 if log_level > 0 else 0)
     populacao.append(cromo)
   return populacao
+inicial = populacaoInicial(10, log_level=1, seed=1)
 
 
 def algoritmo_genetico(
