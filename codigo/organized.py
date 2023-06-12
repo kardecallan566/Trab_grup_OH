@@ -1,5 +1,3 @@
-# TODO ver commit anterior e mudar aqui
-
 # imports
 import itertools
 import pandas as pd
@@ -7,9 +5,6 @@ import random
 import plotnine.options
 from plotnine import *
 from pprint import pprint as pp, pformat
-from scipy.stats import norm
-
-
 
 plotnine.options.figure_size = (7, 5)
 
